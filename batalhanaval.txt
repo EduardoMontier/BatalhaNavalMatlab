@@ -1,0 +1,123 @@
+>> %Autor: Paulo Eduardo S. Montier%
+%Artigo: “APLICANDO O GAMIFICATION EM CURSOS DE ENGENHARIA E CIÊNCIAS EXATAS ATRAVÉS DE UM JOGO DE BATALHA NAVAL CONSTRUÍDO COM MATLAB”%
+%Universidade Santa Cecília – UNISANTA – 2018%
+
+disp('BEM VINDO AO BATALHA NAVAL! AGUARDE O CARREGAMENTO DO JOGO')
+
+%------------TABULEIRO DE JOGO-------------%
+
+SIZE = 10;
+
+
+Board = zeros(SIZE);
+plotBoard = Board;
+plotBoard(SIZE + 1,:) = 0; %boost rows by one and assign as zeros
+plotBoard(:,SIZE + 1) = 1; %boost cols by one and assign as ones (pin high)
+Board = plotBoard; %return new boosted size to Blank main board
+figure(1); 
+
+
+
+%------------ALOCANDO O ALVO-------------%
+i = 1+SIZE*rand;
+j = 1+SIZE*rand;
+
+
+loop = 1;
+while (loop)
+   
+   temp = rand * 3;
+   dx = 0;
+   if (temp > 2)
+      dx = 1;
+   elseif (temp < 1)
+      dx = -1;
+   end
+      temp = rand * 3;
+   dy = 0;
+   if (temp > 2)
+      dy = 1;
+   elseif (temp < 1)
+      dy = -1;
+   end
+   
+   i0 = dx * 4 + i;
+   j0 = dy * 4 + j;
+   if (i0 > 0 & i0 <= SIZE & j0 > 0 & j0 <= SIZE)
+      loop = 0;
+   end
+   if (dx == 0 & dy == 0)
+      loop = 1;
+   end
+end   
+
+for I = 0:3
+   Board(int32(i + I * dx),int32(j + I * dy))=1; 
+end
+clear i0 
+clear j0
+clear temp
+clear dx
+clear dy
+
+disp('Alvo alocado')
+targetsOpen = 4;
+
+
+%------------ATAQUE--------------%
+bombs = 25;
+while (bombs > 0 & targetsOpen > 0)
+   
+   titleMsg = sprintf('Você ainda possui %d bombas.',bombs);
+   pcolor(0:SIZE,0:SIZE,plotBoard); 
+   axis off
+   title(titleMsg)
+
+   loop = 1;
+   while loop
+      [x,y] = ginput(1);
+      jDrop = int32(x+1);
+      iDrop = int32(y+1);
+      
+      if (jDrop > 0 & jDrop <= SIZE & iDrop > 0 & iDrop <= SIZE)
+         loop = 0;
+      end
+   end
+   
+   
+
+   if (Board(iDrop,jDrop) == 1)
+      %CASO DE ACERTO
+      disp('Alvo atingido!!!')
+      bombs = bombs - 1;
+      targetsOpen = targetsOpen - 1;
+      Board(iDrop,jDrop) = 0.75;
+      plotBoard(iDrop,jDrop) = 0.75;
+
+     
+   elseif  (Board(iDrop,jDrop) == 0)
+      %CASO DE ERRO
+      disp('Errou!')
+      bombs = bombs - 1;
+      Board(iDrop,jDrop) = 0.25;
+      plotBoard(iDrop,jDrop) = 0.25;
+ 
+   else
+      disp('Por favor tente novamente!')
+   end
+   
+end
+
+%-----------ENCERRAMENTO----------------%
+pcolor(0:SIZE,0:SIZE,Board); 
+axis off
+if (targetsOpen == 0)
+   titleMsg = sprintf('Você venceu! Com %d bombas restantes!',bombs);
+   title(titleMsg)
+  
+
+else
+   titleMsg = sprintf('Você perdeu! Ainda restaram:  %d alvos possíveis.',targetsOpen);
+   title(titleMsg)
+  
+end
